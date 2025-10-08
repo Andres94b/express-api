@@ -1,12 +1,17 @@
 import express, { Express, json, Request, Response } from "express";
 import { PrismaClient } from "./generated/prisma";
-import bcrypt from "bcryptjs";
-import { auth } from "./controllers/auth";
+import { user } from "./controllers/user";
+import cors from "cors";
+import { auth, requiredScopes } from "express-oauth2-jwt-bearer";
+import jwt from "jsonwebtoken";
 
 export const prisma = new PrismaClient();
 
 const app: Express = express();
 const port = 4000;
+// const checkJwt = auth({
+//   audience:
+// })
 
 app.use(json());
 
@@ -25,7 +30,14 @@ app.get("/prisma-client", async (req: Request, res: Response) => {
   res.json(rslt);
 });
 
-app.use("/auth", auth);
+app.use(
+  cors({
+    origin: [process.env.FRONTEND_URL ?? ""],
+    credentials: true,
+  })
+);
+
+app.use("/user", user);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
